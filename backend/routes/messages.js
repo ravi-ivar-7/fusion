@@ -1,5 +1,6 @@
 const { addMessage, getMessages } = require("../controllers/messageController");
-const router = require("express").Router();
+const express = require('express');
+const router = express.Router();
 
 router.post("/addmsg/", addMessage);
 router.post("/getmsg/", getMessages);

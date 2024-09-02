@@ -49,19 +49,18 @@ module.exports.getAllUsers = async (req, res, next) => {
     return res.json({ users, info: 'Feted all available users' })
 }
 
-module.exports.setAvator = async (req, res, next) => {
+module.exports.setAvatar = async (req, res, next) => {  
     try {
         const userId = req.params.id;
         const avatarImage = req.body.image;
-        const userData = await User.findByIdAndUpdate(userId, { isAvatorImageSet: true, avatarImage }, { new: true })
+        const userData = await User.findByIdAndUpdate(userId, { isAvatarImageSet: true, avatarImage }, { new: true });
 
-
-        return res.json({ isSet: userData.isAvatorImageSet, image: userData.isAvatorImageSet, info: 'Avator set successfully.' })
-    }
-    catch (err) {
-        next(ex);
+        return res.json({ isSet: userData.isAvatarImageSet, image: userData.avatarImage, info: 'Avatar set successfully.' });  
+    } catch (err) {
+        next(err);  
     }
 }
+
 
 module.exports.logOut = (req, res, next) => {
     try {
