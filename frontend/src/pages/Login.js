@@ -4,11 +4,11 @@ import styled from 'styled-components';
 import { useNavigate, Link } from "react-router-dom";
 import Logo from "../assets/logo.svg";
 import { loginRoute } from "../utils/APIRoutes";
-import useNotification from '../hooks/useNotification';
+import useNotification from "../hooks/useNotification";
 
 export default function Login() {
     const navigate = useNavigate();
-    const notify = useNotification();
+    const notify = useNotification()
     const [values, setValues] = useState({ username: "", password: "" });
 
     useEffect(() => {
@@ -33,23 +33,29 @@ export default function Login() {
         return true;
     };
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        if (validateForm()) {
-            const { username, password } = values;
-            const { data } = await axios.post(loginRoute, { username, password });
+ const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (validateForm()) {
+        const { username, password } = values;
+        try {
+            const response = await axios.post(loginRoute, { username, password });
 
-            if (data.status === true) {
+            if (response.status === 200 && response.data.user !== undefined) {
                 localStorage.setItem(
                     process.env.REACT_APP_LOCALHOST_KEY,
-                    JSON.stringify(data.user)
+                    JSON.stringify(response.data.user)
                 );
+                notify('Info', `${response.data.warn}`, 'success');
                 navigate("/");
             } else {
-                notify('Error', `${data.msg}`, 'danger');
+                notify('Error', `${response.data.warn}`, 'danger');
             }
+        } catch (error) {
+            console.error("Login error:", error);
+            notify('Error', "An error occurred during login.", 'danger');
         }
-    };
+    }
+};
 
     return (
         <LoginFormContainer>

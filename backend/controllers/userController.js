@@ -6,14 +6,15 @@ module.exports.login = async (req, res, next) => {
         const { username, password } = req.body;
         const user = await User.findOne({ username });
         if (!user)
-            return res.json({ msg: "Incorrect Username or Password", status: false });
+            return res.status(209).json({ warn: "User not found",});
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid)
-            return res.json({ msg: "Incorrect Username or Password", status: false });
+            return res.status(209).json({ warn: "Incorrect Password.",});
         delete user.password;
-        return res.json({ status: true, user, info: 'Successfully looged in.' });
-    } catch (ex) {
-        next(ex);
+        return res.status(200).json({user, info: 'Successfully looged in.' });
+    } catch (err) {
+        next(err);
+        console.log(err)
     }
 };
 
@@ -22,10 +23,10 @@ module.exports.register = async (req, res, next) => {
         const { username, email, password } = req.body;
         const usernameCheck = await User.findOne({ username });
         if (usernameCheck)
-            return res.json({ msg: "Username already used", status: false });
+            return res.status(209).json({ info: "Username already used", });
         const emailCheck = await User.findOne({ email });
         if (emailCheck)
-            return res.json({ msg: "Email already used", status: false });
+            return res.status(209).json({ info: "Email already used", });
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({
             email,
@@ -33,20 +34,25 @@ module.exports.register = async (req, res, next) => {
             password: hashedPassword,
         });
         delete user.password;
-        return res.json({ status: true, user, info: 'Account created successfully.' });
+        return res.status(200).json({ user, info: 'Account created successfully.' });
     } catch (ex) {
         next(ex);
     }
 };
 
 module.exports.getAllUsers = async (req, res, next) => {
-    const users = await User.find({ _id: { $ne: req.params.id } }).select([
-        "email",
-        "username",
-        'avatarImage',
-        '_id',
-    ])
-    return res.json({ users, info: 'Feted all available users' })
+    try {
+        // Fetch users excluding the one with the given id
+        const users = await User.find({ _id: { $ne: req.params.id } })
+            .select(["email", "username", "avatarImage", "_id"])
+            .exec(); // Use exec() to execute the query
+
+        return res.json(users);
+    } catch (error) {
+        // Handle any errors that occur
+        console.error(error);
+        return res.status(500).json({ error: 'An error occurred while fetching users' });
+    }
 }
 
 module.exports.setAvatar = async (req, res, next) => {  
@@ -64,7 +70,7 @@ module.exports.setAvatar = async (req, res, next) => {
 
 module.exports.logOut = (req, res, next) => {
     try {
-        if (!req.params.id) return res.json({ msg: "User id is required " });
+        if (!req.params.id) return res.status(209).json({ warn: "User id is required " });
         onlineUsers.delete(req.params.id)
         return res.json({info: 'Logged out successfully'})
     } catch (ex) {

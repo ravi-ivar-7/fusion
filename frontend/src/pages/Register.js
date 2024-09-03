@@ -49,21 +49,23 @@ export default function Register() {
     event.preventDefault();
     if (handleValidation()) {
       const { email, username, password } = values;
-      const { data } = await axios.post(registerRoute, {
+      const response= await axios.post(registerRoute, {
         username,
         email,
         password,
       });
 
-      if (data.status === false) {
-        notify('Error',`${data.msg}`,'danger' )
-      }
-      if (data.status === true) {
+      if (response.status === 200) {
         localStorage.setItem(
           process.env.REACT_APP_LOCALHOST_KEY,
-          JSON.stringify(data.user)
+          JSON.stringify(response.data.user)
         );
+        notify('Info',`${response.data.info}`,'success' )
         navigate("/");
+        
+      }
+      else{
+        notify('Error',`${response.data.warn}`,'danger' )
       }
     }
   };

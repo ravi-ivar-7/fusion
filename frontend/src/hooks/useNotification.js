@@ -5,6 +5,8 @@ import { useCallback } from 'react';
 
 const useNotification = () => {
   const showNotification = useCallback((title, message, type) => {
+    console.log(title, message, type)
+    console.log(Store, 'store');
     Store.addNotification({
       title: title,
       message: message,
