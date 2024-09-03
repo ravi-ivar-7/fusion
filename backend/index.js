@@ -29,10 +29,11 @@ const server = app.listen(process.env.PORT, () => {
 
 const io = socketIO(server, {
     cors: {
-        origin: 'http://localhost:3000',  // Corrected to 'localhost'
-        credentials: true,
+        origin: "*",  // Allow all origins
+        credentials: true,  // Allow credentials (cookies, authorization headers, etc.)
     }
 });
+
 
 global.onlineUsers = new Map();
 
