@@ -52,6 +52,20 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('send-file', (data) => {
+        const sendUserSocket = onlineUsers.get(data.to);
+        console.log('Received file', data.name, data.type);
+        if (sendUserSocket) {
+          // Emit file data along with metadata
+          socket.to(sendUserSocket).emit('file-receive', {
+            arrayBuffer: data.arrayBuffer,
+            name: data.name,
+            type: data.type
+          });
+        }
+      });
+      
+
     socket.on('disconnect', () => {
         onlineUsers.forEach((value, key) => {
             if (value === socket.id) {
