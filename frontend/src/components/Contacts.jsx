@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import Logo from "../assets/logo.svg";
+import Logo from "../assets/logo.png";
 
 export default function Contacts({ contacts, changeChat }) {
-  const [currentUserName, setCurrentUserName] = useState(undefined);
-  const [currentUserImage, setCurrentUserImage] = useState(undefined);
+  const [currentUserName, setCurrentUserName] = useState("");
+  const [currentUserImage, setCurrentUserImage] = useState("");
   const [currentSelected, setCurrentSelected] = useState(undefined);
-console.log('contaces', contacts)
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUserData = async () => {
       const data = await JSON.parse(
         localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
       );
@@ -17,7 +17,8 @@ console.log('contaces', contacts)
         setCurrentUserImage(data.avatarImage);
       }
     };
-    fetchData();
+
+    fetchUserData();
   }, []);
 
   const changeCurrentChat = (index, contact) => {
@@ -31,10 +32,10 @@ console.log('contaces', contacts)
         <Container>
           <div className="brand">
             <img src={Logo} alt="logo" />
-            <h3>snappy</h3>
+            <h3>fusion</h3>
           </div>
           <div className="contacts">
-            { contacts &&  contacts.map((contact, index) => (
+            {contacts.map((contact, index) => (
               <div
                 key={contact._id}
                 className={`contact ${
@@ -45,7 +46,7 @@ console.log('contaces', contacts)
                 <div className="avatar">
                   <img
                     src={`data:image/svg+xml;base64,${contact.avatarImage}`}
-                    alt="avatar"
+                    alt=""
                   />
                 </div>
                 <div className="username">
@@ -76,30 +77,25 @@ const Container = styled.div`
   grid-template-rows: 10% 75% 15%;
   overflow: hidden;
   background-color: #080420;
-
   .brand {
     display: flex;
     align-items: center;
     gap: 1rem;
     justify-content: center;
-
     img {
       height: 2rem;
     }
-
     h3 {
       color: white;
       text-transform: uppercase;
     }
   }
-
   .contacts {
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow: auto;
     gap: 0.8rem;
-
     &::-webkit-scrollbar {
       width: 0.2rem;
       &-thumb {
@@ -108,7 +104,6 @@ const Container = styled.div`
         border-radius: 1rem;
       }
     }
-
     .contact {
       background-color: #ffffff34;
       min-height: 5rem;
@@ -120,22 +115,17 @@ const Container = styled.div`
       gap: 1rem;
       align-items: center;
       transition: 0.5s ease-in-out;
-
       .avatar {
         img {
           height: 3rem;
-          width: 3rem;
-          border-radius: 50%;
         }
       }
-
       .username {
         h3 {
           color: white;
         }
       }
     }
-
     .selected {
       background-color: #9a86f3;
     }
@@ -147,24 +137,19 @@ const Container = styled.div`
     justify-content: center;
     align-items: center;
     gap: 2rem;
-
     .avatar {
       img {
         height: 4rem;
-        width: 4rem;
-        border-radius: 50%;
+        max-inline-size: 100%;
       }
     }
-
     .username {
       h2 {
         color: white;
       }
     }
-
     @media screen and (min-width: 720px) and (max-width: 1080px) {
       gap: 0.5rem;
-
       .username {
         h2 {
           font-size: 1rem;

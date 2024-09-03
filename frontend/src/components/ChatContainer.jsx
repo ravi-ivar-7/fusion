@@ -6,31 +6,22 @@ import axios from "axios";
 import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
 
 export default function ChatContainer({ currentChat, socket }) {
-  const [messages, setMessages] = useState([]); // Ensure messages is an array
+  const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
 
+  // Fetch messages when currentChat changes
   useEffect(() => {
-    const getCurrentChat = async () => {
-      if (currentChat) {
-        await JSON.parse(
-          localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-        )._id;
-      }
-    };
-    getCurrentChat();
-  }, [currentChat]);
-
-  useEffect(() => {
-    const fetchData = async () => {
+    const fetchMessages = async () => {
       try {
-        const data = JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
+        const data = JSON.parse(
+          localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+        );
         const response = await axios.post(recieveMessageRoute, {
           from: data._id,
           to: currentChat._id,
         });
-
-        // Ensure response data is an array
+        // Ensure response.data is an array
         if (Array.isArray(response.data)) {
           setMessages(response.data);
         } else {
@@ -42,13 +33,16 @@ export default function ChatContainer({ currentChat, socket }) {
     };
 
     if (currentChat) {
-      fetchData();
+      fetchMessages();
     }
   }, [currentChat]);
 
+  // Handle sending a message
   const handleSendMsg = async (msg) => {
     try {
-      const data = JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
+      const data = JSON.parse(
+        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+      );
       socket.current.emit("send-msg", {
         to: currentChat._id,
         from: data._id,
@@ -61,26 +55,36 @@ export default function ChatContainer({ currentChat, socket }) {
       });
 
       // Add the sent message to the local messages state
-      setMessages(prev => [...prev, { fromSelf: true, message: msg }]);
+      setMessages((prev) => [...prev, { fromSelf: true, message: msg }]);
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
 
+  // Listen for incoming messages
   useEffect(() => {
     if (socket.current) {
-      socket.current.on("msg-recieve", (msg) => {
+      const handleMessageReceive = (msg) => {
         setArrivalMessage({ fromSelf: false, message: msg });
-      });
+      };
+
+      socket.current.on("msg-receive", handleMessageReceive);
+
+      // Cleanup to remove the event listener when the component unmounts or socket changes
+      return () => {
+        socket.current.off("msg-recieve", handleMessageReceive);
+      };
     }
   }, [socket]);
 
+  // Update messages when a new message arrives
   useEffect(() => {
     if (arrivalMessage) {
-      setMessages(prev => [...prev, arrivalMessage]);
+      setMessages((prev) => [...prev, arrivalMessage]);
     }
   }, [arrivalMessage]);
 
+  // Scroll to the latest message
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);

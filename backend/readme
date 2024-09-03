@@ -1,0 +1,25 @@
+## Make a .env file and add following key-value:
+```
+PORT=3002
+MONGO_URL=''
+```
+
+
+## Starting the Backend Server (Nodejs)
+
+### Installation
+
+To install the necessary dependencies, run:
+
+```bash
+npm install
+```
+
+### Start the Server
+
+To start the development server, use:
+
+```bash
+npm start
+```
+Open http://localhost:3002 in your browser to view the application.

@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import Robot from "../assets/robot.gif";
+import Robot from "../assets/chat.gif";
 
 export default function Welcome() {
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
-    // Define an async function within the effect
-    const fetchUserName = async () => {
-      const storedUser = JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
-      if (storedUser) {
-        setUserName(storedUser.username);
-      }
+    const setUser = async () => {
+      const userData = await JSON.parse(
+        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+      );
+      setUserName(userData?.username || "User");
     };
-
-    fetchUserName(); // Call the async function
+    setUser();
   }, []);
 
   return (

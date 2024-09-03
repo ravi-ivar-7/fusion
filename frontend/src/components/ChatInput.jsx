@@ -7,18 +7,19 @@ import Picker from "emoji-picker-react";
 export default function ChatInput({ handleSendMsg }) {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
   };
 
   const handleEmojiClick = (event, emojiObject) => {
-    setMsg((prevMsg) => prevMsg + emojiObject.emoji);
+    let message = msg;
+    message += emojiObject.emoji;
+    setMsg(message);
   };
 
   const sendChat = (event) => {
     event.preventDefault();
-    if (msg.trim().length > 0) {
+    if (msg.length > 0) {
       handleSendMsg(msg);
       setMsg("");
     }
@@ -32,10 +33,10 @@ export default function ChatInput({ handleSendMsg }) {
           {showEmojiPicker && <Picker onEmojiClick={handleEmojiClick} />}
         </div>
       </div>
-      <form className="input-container" onSubmit={sendChat}>
+      <form className="input-container" onSubmit={(event) => sendChat(event)}>
         <input
           type="text"
-          placeholder="Type your message here"
+          placeholder="type your message here"
           onChange={(e) => setMsg(e.target.value)}
           value={msg}
         />
@@ -55,6 +56,7 @@ const Container = styled.div`
   padding: 0 2rem;
   @media screen and (min-width: 720px) and (max-width: 1080px) {
     padding: 0 1rem;
+    gap: 1rem;
   }
   .button-container {
     display: flex;
@@ -70,8 +72,7 @@ const Container = styled.div`
       }
       .emoji-picker-react {
         position: absolute;
-        bottom: 100%;
-        left: 0;
+        top: -350px;
         background-color: #080420;
         box-shadow: 0 5px 10px #9a86f3;
         border-color: #9a86f3;
@@ -102,7 +103,7 @@ const Container = styled.div`
     border-radius: 2rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 2rem;
     background-color: #ffffff34;
     input {
       width: 90%;
@@ -112,6 +113,7 @@ const Container = styled.div`
       border: none;
       padding-left: 1rem;
       font-size: 1.2rem;
+
       &::selection {
         background-color: #9a86f3;
       }
@@ -120,22 +122,22 @@ const Container = styled.div`
       }
     }
     button {
-      padding: 0.3rem 1rem;
+      padding: 0.3rem 2rem;
       border-radius: 2rem;
       display: flex;
       justify-content: center;
       align-items: center;
       background-color: #9a86f3;
       border: none;
+      @media screen and (min-width: 720px) and (max-width: 1080px) {
+        padding: 0.3rem 1rem;
+        svg {
+          font-size: 1rem;
+        }
+      }
       svg {
         font-size: 2rem;
         color: white;
-      }
-      @media screen and (min-width: 720px) and (max-width: 1080px) {
-        padding: 0.3rem 0.5rem;
-        svg {
-          font-size: 1.5rem;
-        }
       }
     }
   }

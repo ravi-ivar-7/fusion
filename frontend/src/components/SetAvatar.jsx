@@ -2,23 +2,27 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { Buffer } from "buffer";
-import loader from "../assets/loader.gif";
+import loader from "../assets/loading.gif";
+import useNotification from "../hooks/useNotification";
 import { useNavigate } from "react-router-dom";
 import { setAvatarRoute } from "../utils/APIRoutes";
-import useNotification from '../hooks/useNotification';
 
 export default function SetAvatar() {
   const api = `https://api.multiavatar.com/4645646`;
   const navigate = useNavigate();
-  const notify = useNotification();
   const [avatars, setAvatars] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAvatar, setSelectedAvatar] = useState(undefined);
+  const notify = useNotification()
 
-  useEffect(async () => {
-    if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY))
-      navigate("/login");
-  }, []);
+  useEffect(() => {
+    const checkUser = async () => {
+      if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
+        navigate("/login");
+      }
+    };
+    checkUser();
+  }, [navigate]);
 
   const setProfilePicture = async () => {
     if (selectedAvatar === undefined) {
@@ -28,60 +32,64 @@ export default function SetAvatar() {
         localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
       );
 
-      const response= await axios.post(`${setAvatarRoute}/${user._id}`, {
+      const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
         image: avatars[selectedAvatar],
       });
 
-      if (response.data.isSet) {
+      if (data.isSet) {
         user.isAvatarImageSet = true;
-        user.avatarImage = response.data.image;
+        user.avatarImage = data.image;
         localStorage.setItem(
           process.env.REACT_APP_LOCALHOST_KEY,
           JSON.stringify(user)
         );
         navigate("/");
       } else {
-        notify('Error', "Error setting avatar. Please try again.", 'danger')
+        notify('Error','Error setting avatar. Please try again. ' , 'danger')
       }
     }
   };
 
-  useEffect(async () => {
-    const data = [];
-    for (let i = 0; i < 4; i++) {
-      const image = await axios.get(
-        `${api}/${Math.round(Math.random() * 1000)}`
-      );
-      const buffer = new Buffer(image.data);
-      data.push(buffer.toString("base64"));
-    }
-    setAvatars(data);
-    setIsLoading(false);
-  }, []);
+  useEffect(() => {
+    const fetchAvatars = async () => {
+      const data = [];
+      for (let i = 0; i < 4; i++) {
+        const image = await axios.get(
+          `${api}/${Math.round(Math.random() * 1000)}`
+        );
+        const buffer = new Buffer(image.data);
+        data.push(buffer.toString("base64"));
+      }
+      setAvatars(data);
+      setIsLoading(false);
+    };
+    fetchAvatars();
+  }, [api]);
+
   return (
     <>
       {isLoading ? (
-        <AvatarContainer>
+        <Container>
           <img src={loader} alt="loader" className="loader" />
-        </AvatarContainer>
+        </Container>
       ) : (
-        <AvatarContainer>
-          <div className="title-AvatarContainer">
+        <Container>
+          <div className="title-container">
             <h1>Pick an Avatar as your profile picture</h1>
           </div>
           <div className="avatars">
             {avatars.map((avatar, index) => {
               return (
                 <div
+                  key={index}
                   className={`avatar ${
                     selectedAvatar === index ? "selected" : ""
                   }`}
+                  onClick={() => setSelectedAvatar(index)}
                 >
                   <img
                     src={`data:image/svg+xml;base64,${avatar}`}
                     alt="avatar"
-                    key={avatar}
-                    onClick={() => setSelectedAvatar(index)}
                   />
                 </div>
               );
@@ -90,13 +98,13 @@ export default function SetAvatar() {
           <button onClick={setProfilePicture} className="submit-btn">
             Set as Profile Picture
           </button>
-        </AvatarContainer>
+        </Container>
       )}
     </>
   );
 }
 
-const AvatarContainer = styled.div`
+const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -110,7 +118,7 @@ const AvatarContainer = styled.div`
     max-inline-size: 100%;
   }
 
-  .title-AvatarContainer {
+  .title-container {
     h1 {
       color: white;
     }

@@ -4,70 +4,64 @@ import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import styled from "styled-components";
 import { allUsersRoute, host } from "../utils/APIRoutes";
-import useNotification from '../hooks/useNotification';
-
-import Welcome from "../components/Welcome";
 import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
-
+import Welcome from "../components/Welcome";
 
 export default function Chat() {
   const navigate = useNavigate();
   const socket = useRef();
-  const notify = useNotification();
-
   const [contacts, setContacts] = useState([]);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUser = async () => {
       if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
         navigate("/login");
       } else {
-        try {
-          const userInfo = JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
-          setCurrentUser(userInfo);
-        } catch (error) {
-          notify('Error','Failed to fetch messages','danger')
-        }
+        setCurrentUser(
+          JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY))
+        );
       }
     };
-    fetchData();
-  }, [currentChat, navigate]);
+    fetchUser();
+  }, [navigate]);
 
   useEffect(() => {
     if (currentUser) {
       socket.current = io(host);
-      socket.current.emit("add-usr", currentUser._id);
+      socket.current.emit("add-user", currentUser._id);
+      
+      // Cleanup function to disconnect the socket when the component unmounts
+      return () => {
+        if (socket.current) {
+          socket.current.disconnect();
+        }
+      };
     }
   }, [currentUser]);
-
-  useEffect(() => {
-    if (currentUser) {
-      if (currentUser.isAvatarImageSet) {
-        axios.get(`${allUsersRoute}/${currentUser._id}`)
-          .then(response => {
-            // const data = Array.isArray(response.data) ? response.data : [];
-            setContacts(response.data);
-          })
-          .catch(() => {
-            notify( 'Error',"Failed to load contacts",'danger');
-          });
-      } else {
-        navigate("/setAvatar");
-      }
-    }
-  }, [currentUser, navigate]);
   
+  useEffect(() => {
+    const fetchContacts = async () => {
+      if (currentUser) {
+        if (currentUser.isAvatarImageSet) {
+          const { data } = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+          setContacts(data);
+        } else {
+          navigate("/setAvatar");
+        }
+      }
+    };
+    fetchContacts();
+  }, [currentUser, navigate]);
+
   const handleChatChange = (chat) => {
     setCurrentChat(chat);
   };
 
-
   return (
     <>
-         <>
       <Container>
         <div className="container">
           <Contacts contacts={contacts} changeChat={handleChatChange} />
@@ -79,10 +73,8 @@ export default function Chat() {
         </div>
       </Container>
     </>
-    </>
   );
 }
-
 
 const Container = styled.div`
   height: 100vh;
@@ -94,8 +86,8 @@ const Container = styled.div`
   align-items: center;
   background-color: #131324;
   .container {
-    height: 85vh;
-    width: 85vw;
+    height: 100vh;
+    width: 100vw;
     background-color: #00000076;
     display: grid;
     grid-template-columns: 25% 75%;
