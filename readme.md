@@ -1,11 +1,3 @@
-# Candidate Infomation:
-
-- Name: Ravi Kumar
-- University: Indian Institute Of Technology, Kharagpur
-- Department: Mathematics and Computing
-- Email: ravikumar117211@gmail.com
-- Phone No. : 8529204207
-
 # Project Status:
 - **Live at**: [`https://fusion-virid.vercel.app`](https://fusion-virid.vercel.app)
 - ⚠️ **Note**: The application may take a few seconds to load initially due to the cold start of the render servers (where the backend is hosted).
